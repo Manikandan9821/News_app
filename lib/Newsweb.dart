@@ -20,7 +20,11 @@ class _WebviewState extends State<Webview> {
       appBar: AppBar(
         backgroundColor: Colors.grey[300],
         elevation: 0.0,
-        title: Text(widget.name),
+        title: Text(widget.name,style: TextStyle(color: Colors.black),),
+        leading: IconButton(icon: Icon(Icons.arrow_back_ios,color: Colors.black,), onPressed: () { Navigator.pop(context);},),
+        /*actions: <Widget>[
+          IconButton(icon: Icon(Icons.arrow_back_ios,color: Colors.black,), onPressed: () { },),
+        ],*/
       ),
       body: widget.Url != null
           ? WebView(

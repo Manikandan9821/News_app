@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:news_app/ApiServices/ApiServices.dart';
+import 'package:news_app/Models/listItem.dart';
 import 'package:news_app/Newsweb.dart';
 import 'package:provider/provider.dart';
 
@@ -11,28 +13,35 @@ class NewsApp extends StatefulWidget {
 
 class _NewsAppState extends State<NewsApp> {
 
-  //error image
-  String noimage = "https://dab1nmslvvntp.cloudfront.net/wp-content/uploads/2015/12/1450973046wordpress-errors.png";
 
   @override
   Widget build(BuildContext context) {
+
+    var screenheight = MediaQuery.of(context).size.height;
+    var screenwidth = MediaQuery.of(context).size.width;
 
     //providers
     final services = Provider.of<Services>(context);
     services.getServices();
 
     return Scaffold(
+
       appBar: AppBar(
+
         backgroundColor: Colors.grey[300],
-        elevation: 0.0,
+        elevation: 0.5,
+        title: Text('News App',style: TextStyle(color: Colors.black),),
         iconTheme: IconThemeData(
           color: Colors.black,
         ),
       ),
+
       drawer: Drawer(),
+
       backgroundColor: Colors.grey[300],
-      body: SingleChildScrollView(
-        child: Column(
+
+      body: Column(
+
           children: <Widget>[
 
             Align(
@@ -49,101 +58,38 @@ class _NewsAppState extends State<NewsApp> {
               ),
             ),
 
-            services.newsModel.articles != null ?
-            ListView.builder(
-              physics: ClampingScrollPhysics(),
-              scrollDirection: Axis.vertical,
-              shrinkWrap: true,
-              itemCount: services.newsModel.articles.length == null ? 0 : services.newsModel.articles.length,
-              itemBuilder: (BuildContext context, int i) {
-                return Card(
-                  elevation: 0.5,
-                  child: InkWell(
-                    onTap: (){
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => Webview(
-                              Url: services.newsModel.articles[i].url,
-                              name: services.newsModel.articles[i].source.name,
-                            ),
-                          ));
-                    },
-                    child: Row(
-                      children: <Widget>[
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: <Widget>[
 
-                            //descriptions
-                            Padding(
-                              padding: const EdgeInsets.only(top:11.0,left: 10.0),
-                              child: Container(
-                                width: 200,
-                                child:  Text(
-                                  services.newsModel.articles[i].description != null ?
-                                  services.newsModel.articles[i].description
-                                      : "No Description",
-                                  textAlign: TextAlign.left,
-                                  maxLines: 7,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(fontSize: 15.5),
-                                ),
-                              ),
-                            ),
+            Expanded(
+              child: services.newsModel.articles != null ?
 
-                            SizedBox(height: 5.0,),
+              ListView.builder(
+                physics: ClampingScrollPhysics(),
+                shrinkWrap: true,
+                scrollDirection: Axis.vertical,
+                 itemCount: services.newsModel.articles.length == null ? 0 : services.newsModel.articles.length,
+                  itemBuilder: (context,index){
+                    var formatTime = DateFormat('dd MMM - HH:mm').format(services.newsModel.articles[index].publishedAt);
+                    return
+                      ListItems(
+                        description:services.newsModel.articles[index].description,
+                        url: services.newsModel.articles[index].url,
+                        name: services.newsModel.articles[index].source.name,
+                        time : formatTime,
+                        image: services.newsModel.articles[index].urlToImage,
+                    );
+                  },
+              )
 
-                            //name
-                            Padding(
-                              padding: const EdgeInsets.only(left:8.0,top: 4.0),
-                              child: Text(services.newsModel.articles[i].source.name),
-                            ),
+              : Center(child: CircularProgressIndicator(),),
+            ),
 
-                            //time
-                            Padding(
-                              padding: const EdgeInsets.only(left:8.0,top: 5.0,bottom: 3.0),
-                              child: Row(
-                                children: <Widget>[
-                                  Icon(Icons.access_time,color: Colors.redAccent,size: 17.0,),
-
-                                  SizedBox(width: 5.0,),
-
-                                  Text(services.newsModel.articles[i].publishedAt.hour.toString()+" hours"),
-                                ],
-                              ),
-                            ),
-
-                          ],
-                        ),
-                        //image
-                        Expanded(
-                          child: Container(
-                            width: 150.0,height: 150.0,
-                            decoration: BoxDecoration(
-                              image: DecorationImage(
-                                image: NetworkImage(
-                                  services.newsModel.articles[i].urlToImage != null
-                                      ? services.newsModel.articles[i].urlToImage
-                                      : noimage,
-                                ),
-                                fit: BoxFit.fill,
-                              ),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                );
-              },
-            ) : Center(child: CircularProgressIndicator(),),
           ],
         ),
-      ),
+
     );
   }
+
+
+
+
 }
